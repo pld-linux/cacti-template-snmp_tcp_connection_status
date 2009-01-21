@@ -1,32 +1,29 @@
-#/bin/bash
+#!/bin/sh
 
 # get number of tcp connection
 # $1 = hostname
 # $2 = snmp community
 # lots of ways to do this with more style... ;)
 # jbrooks@oddelement.com
+#
+# modified by Elan Ruusamäe <glen@pld-linux.org>
 
-CACTIDIR=/var/www/htdocs/cacti/scripts
 TMPDIR=/tmp
 
-cd $CACTIDIR
+snmpnetstat -v 2c -c "$2" -Can -Cp tcp "$1" | awk '
+	$1 == "tcp" {
+		ss[$4]++;
+	}
 
-
-snmpnetstat -v 2c -c $2 -Can -Cp tcp $1 > $TMPDIR/$1
-
-ESTABLISHED=`grep ESTABLISHED $TMPDIR/$1 |wc -l`
-LISTENING=`grep LISTEN $TMPDIR/$1 |wc -l`
-TIME_WAIT=`grep TIMEWAIT $TMPDIR/$1 |wc -l`
-TIME_CLOSE=`grep TIMECLOSE $TMPDIR/$1 |wc -l`
-FIN1=`grep FINWAIT1 $TMPDIR/$1 |wc -l`
-FIN2=`grep FINWAIT2 $TMPDIR/$1 |wc -l`
-SYNSENT=`grep SYNSENT $TMPDIR/$1 |wc -l`
-SYNRECV=`grep SYNRECV $TMPDIR/$1 |wc -l`
-
-echo -n established:${ESTABLISHED} listen:${LISTENING} time_wait:${TIME_WAIT} time_close:${TIME_CLOSE} syn_sent:${SYNSENT} fin_wait1:${FIN1} fin_wait2:${FIN2} syn_recv:${SYNRECV}
-
-# uncomment for debugging:
-# echo $1: established:$ESTABLISHED listen:$LISTENING time_wait:$TIME_WAIT time_close:$TIME_CLOSE syn_sent:$SYN fin_wait1:$FIN1 fin_wait2:$FIN2 >> $TMPDIR/tcp.log
-
-# may want to comment this for debugging too
-rm $TMPDIR/$1
+	END {
+		# socket states from net-snmp-5.4.2.1/apps/snmpnetstat/inet.c
+		split("CLOSED LISTEN SYNSENT SYNRECEIVED ESTABLISHED FINWAIT1 FINWAIT2 CLOSEWAIT LASTACK CLOSING TIMEWAIT", t, " ");
+		# create mapping (duh, why there are different data names used?)
+		# XXX TIMECLOSE missing
+		split("closed listen syn_sent syn_recv established fin_wait1 fin_wait2 closewait lastack closing time_wait", m, " ");
+		for (i in t) {
+			s = t[i];
+			k = m[i];
+			printf("%s:%d ", k, ss[s]);
+		}
+}'
