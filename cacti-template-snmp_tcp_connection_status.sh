@@ -1,14 +1,12 @@
 #!/bin/sh
-
 # get number of tcp connection
 # $1 = hostname
 # $2 = snmp community
+
 # lots of ways to do this with more style... ;)
 # jbrooks@oddelement.com
-#
-# modified by Elan Ruusamäe <glen@pld-linux.org>
 
-TMPDIR=/tmp
+# convert to use awk by Elan Ruusamäe <glen@pld-linux.org>
 
 snmpnetstat -v 2c -c "$2" -Can -Cp tcp "$1" | awk '
 	$1 == "tcp" {
