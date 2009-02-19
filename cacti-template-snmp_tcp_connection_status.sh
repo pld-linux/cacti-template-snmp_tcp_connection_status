@@ -1,14 +1,21 @@
 #!/bin/sh
+#
 # get number of tcp connection
-# $1 = hostname
-# $2 = snmp community
-
-# lots of ways to do this with more style... ;)
 # jbrooks@oddelement.com
+#
+# modified to use awk and added timeout param by Elan Ruusamäe <glen@pld-linux.org>
 
-# convert to use awk by Elan Ruusamäe <glen@pld-linux.org>
+hostname=$1
+snmp_community=${2:-public}
+timeout=${3:-10}
+retry=5
 
-snmpnetstat -v 2c -c "$2" -Can -Cp tcp "$1" | awk '
+if [ -z "$hostname" ]; then
+	echo >&2 "Usage: $0 HOSTNAME [SNMP_COMMUNITY] [TIMEOUT]"
+	exit 1
+fi
+
+snmpnetstat -v 2c -r "$retry" -c "$snmp_community" -t "$timeout" -Can -Cp tcp "$hostname" | awk '
 	$1 == "tcp" {
 		ss[$4]++;
 	}
@@ -18,7 +25,7 @@ snmpnetstat -v 2c -c "$2" -Can -Cp tcp "$1" | awk '
 		split("CLOSED LISTEN SYNSENT SYNRECEIVED ESTABLISHED FINWAIT1 FINWAIT2 CLOSEWAIT LASTACK CLOSING TIMEWAIT", t, " ");
 		# create mapping (duh, why there are different data names used?)
 		# XXX TIMECLOSE missing
-		split("closed listen syn_sent syn_recv established fin_wait1 fin_wait2 closewait lastack closing time_wait", m, " ");
+		split("time_close listen syn_sent syn_recv established fin_wait1 fin_wait2 closewait lastack closing time_wait", m, " ");
 		for (i in t) {
 			s = t[i];
 			k = m[i];
