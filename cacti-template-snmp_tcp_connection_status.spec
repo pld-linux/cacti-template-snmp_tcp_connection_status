@@ -27,7 +27,7 @@ Plugin for Cacti - Monitor TCP Connection Status.
 %prep
 %setup -q -c
 mv get_tcp_connections{,.orig}
-install %{SOURCE1} get_tcp_connections.sh
+install %{SOURCE1} get_tcp_connections
 %{__sed} -i -e 's,/bin/bash /var/www/htdocs/cacti/scripts/get_tcp_connections,%{scriptsdir}/%{plugin},' *.xml
 
 %install
