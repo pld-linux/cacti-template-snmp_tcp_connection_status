@@ -1,42 +1,30 @@
 #!/bin/sh
-# NT: print netstat statistics
-# Author: glen@delfi.ee
-# $Id$
-
-# closing:0 time_wait:0 time_close:0 listen:13 syn_sent:0 syn_recv:0 established:4 fin_wait1:0 fin_wait2:0 closewait:0 lastack:0
 # closing:1 syn_sent:0 established:1887 closewait:0 time_close:0 fin_wait1:28 lastack:4 fin_wait2:725 time_wait:25025 syn_recv:22 listen:14
 
-LC_ALL=C ss -ant | PERL_BADLANG=0 perl -ane '
+LC_ALL=C ss -ant | awk '
 BEGIN {
-	my %m = (
-		established => "ESTAB",
-		syn_sent => "SYN-SENT",
-		syn_recv => "SYN-RECV",
-		fin_wait1 => "FIN-WAIT-1",
-		fin_wait2 => "FIN-WAIT-2",
-		time_wait => "TIME-WAIT",
-		time_close => "UNCONN",
-		closewait => "CLOSE-WAIT",
-		lastack => "LAST-ACK",
-		listen =>  "LISTEN",
-		closing => "CLOSING",
-	);
-
-	# reset values to 0
-	%a = map { $_ => 0 } values %m;
-
-	# create reverse map for pretty print
-	%r = map { $m{$_} => $_ } keys %m;
+	m["ESTAB"] = "established";
+	m["SYN-SENT"] = "syn_sent";
+	m["SYN-RECV"] = "syn_recv";
+	m["FIN-WAIT-1"] = "fin_wait1";
+	m["FIN-WAIT-2"] = "fin_wait2";
+	m["TIME-WAIT"] = "time_wait";
+	m["UNCONN"] = "time_close";
+	m["CLOSE-WAIT"] = "closewait";
+	m["LAST-ACK"] = "lastack";
+	m["LISTEN"] = "listen";
+	m["CLOSING"] = "closing";
 }
 
-++$a{$F[0]} if $F[0] =~ /^[A-Z0-9-]+$/;
+$1 ~ /^[A-Z0-9-]+$/ {
+	k = m[$1];
+	c[k]++;
+	next;
+}
 
 END {
-	my $t = $p = 0;
-	while (my($k, $v) = each %a) {
-		$k = $r{$k};
-		$t += $v;
-		$p = $p > length($v) ? $p : length($v);
-		printf("%s:%d ", $k, $v);
+	for (i in m) {
+		k = m[i];
+		printf("%s:%d ", k, c[k]);
 	}
 }'
