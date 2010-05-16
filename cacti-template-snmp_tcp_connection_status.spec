@@ -14,6 +14,7 @@ Source1:	%{name}.sh
 Source2:	tcpstat
 URL:		http://forums.cacti.net/viewtopic.php?t=12766
 BuildRequires:	sed >= 4.0
+BuildRequires:	unzip
 Requires:	cacti >= 0.8.6j
 Requires:	cacti-add_template
 Requires:	net-snmp-utils
