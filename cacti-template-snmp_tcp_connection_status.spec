@@ -4,7 +4,7 @@
 Summary:	TCP Connection Status template for Cacti
 Name:		cacti-template-%{template}
 Version:	0.2
-Release:	1
+Release:	2
 License:	GPL v2
 Group:		Applications/WWW
 # Source0Download: http://forums.cacti.net/download.php?id=5198
@@ -13,10 +13,10 @@ Source0:	tcp-connections.zip
 Source1:	%{name}.sh
 Source2:	tcpstat
 URL:		http://forums.cacti.net/viewtopic.php?t=12766
+BuildRequires:	rpmbuild(macros) >= 1.554
 BuildRequires:	sed >= 4.0
 BuildRequires:	unzip
-Requires:	cacti >= 0.8.6j
-Requires:	cacti-add_template
+Requires:	cacti >= 0.8.7e-9
 Requires:	net-snmp-utils
 Obsoletes:	cacti-plugin-snmp_tcp_connection_status
 BuildArch:	noarch
@@ -49,7 +49,7 @@ Requires:	net-snmp
 SNMPd agent to provide TCP Connection statistics.
 
 %prep
-%setup -q -c
+%setup -qc
 %{__sed} -i -e 's,/bin/bash /var/www/htdocs/cacti/scripts/get_tcp_connections,%{scriptsdir}/%{template},' *.xml
 
 %install
@@ -60,7 +60,7 @@ install -p %{SOURCE1} $RPM_BUILD_ROOT%{scriptsdir}/%{template}
 install -p %{SOURCE2} $RPM_BUILD_ROOT%{_libdir}/snmpd-agent-tcpstat
 
 %post
-%{_sbindir}/cacti-add_template %{resourcedir}/cacti_graph_template_tcp_connections.xml
+%cacti_import_template %{resourcedir}/cacti_graph_template_tcp_connections.xml
 
 %post -n net-snmp-agent-tcpstat
 if ! grep -qF %{snmpoid} %{snmpdconfdir}/snmpd.local.conf; then

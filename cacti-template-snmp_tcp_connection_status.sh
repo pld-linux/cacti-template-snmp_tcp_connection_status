@@ -17,8 +17,8 @@ snmp_community=${2:-public}
 timeout=${3:-10}
 retry=5
 
-# handle case when template was imported with <> getting lost
-if [ -z "$hostname" -o "$hostname" = "hostcommunity" ]; then # WTF
+# parse required args
+if [ -z "$hostname" ]; then
 	echo >&2 "Usage: $PROGRAM HOSTNAME [SNMP_COMMUNITY] [TIMEOUT]"
 	exit 1
 fi
