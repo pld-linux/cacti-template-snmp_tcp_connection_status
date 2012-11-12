@@ -4,7 +4,7 @@
 Summary:	TCP Connection Status template for Cacti
 Name:		cacti-template-%{template}
 Version:	0.2
-Release:	2
+Release:	3
 License:	GPL v2
 Group:		Applications/WWW
 # Source0Download: http://forums.cacti.net/download.php?id=5198
@@ -42,7 +42,8 @@ You need net-snmp-agent-tcpstat installed on SNMP server side.
 Summary:	SNMPd agent to provide TCP Connection statistics
 Group:		Networking/Daemons
 Requires:	awk
-Requires:	iproute2
+# iproute2
+Requires:	/sbin/ss
 Requires:	net-snmp
 
 %description -n net-snmp-agent-tcpstat
